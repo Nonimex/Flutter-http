@@ -1,0 +1,143 @@
+## Main Dart
+```
+import 'package:flutter/material.dart';
+
+import 'package:app_sem11_py_contact4949/MyContactList.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Mycontactlist()
+    );
+  }
+}
+
+```
+
+
+## MyContactList
+```
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:app_sem11_py_contact4949/MyContactProfile.dart';
+class Mycontactlist extends StatefulWidget {
+  Mycontactlist({super.key});
+
+  @override
+  State<Mycontactlist> createState() => _MycontactlistState();
+}
+
+class _MycontactlistState extends State<Mycontactlist> {
+  //get the url of the API
+  String url = "https://randomuser.me/api/?results=500";
+  // A simple Array where stores the data
+  List data=[];
+
+  //This execute one time with initState
+  @override
+  void initState(){
+    // Add the method with the future
+    super.initState();
+    this.makeRequest();
+  }
+
+  Future<String> makeRequest() async{
+    var response = await http.get(Uri.parse(url),
+    headers: {'Accept': 'aplication/json'});
+
+
+    setState(() {
+      var extractData = json.decode(response.body);
+      data = extractData['results'];
+    });
+
+    //print('Name: ' +data[0]['name']['first"']);
+    //print('Email: ' +data[0]['email']);
+
+    //print(response.body);
+    return (response.body);
+
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("My contact list")
+      ),
+      body: ListView.builder(
+        itemCount: data == null ? 0 : data.length,
+
+          itemBuilder: (BuildContext context, i){
+          return ListTile(
+            title: Text(data[i]['name']['first']),
+            subtitle: Text(data[i]['cell']),
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(data[i]['picture']['thumbnail']),
+            ),
+
+            onTap: (){
+              Navigator.push(
+                context, MaterialPageRoute(builder: (BuildContext context) => Mycontactprofile(data[i]))
+              );
+            },
+          );
+          }
+      )
+    );
+  }
+}
+
+```
+
+## MyContactProfile
+
+```
+import 'package:flutter/material.dart';
+
+class Mycontactprofile extends StatelessWidget {
+  final dynamic data;
+
+  const Mycontactprofile(this.data, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("My contact profile: ${data['name']['first']}"),
+      ),
+      body: Center(
+        child: Container(
+          width: 185,
+          height: 185,
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            image: DecorationImage(
+              image: NetworkImage(data['picture']['thumbnail']),
+              fit: BoxFit.cover, // Evita que la imagen se deforme
+            ),
+            //shape: BoxShape.circle, // Opcional: Hace la foto de perfil circular
+            borderRadius: BorderRadius.all(Radius.circular(180)),
+            border: Border.all(
+              width: 4,
+              color: Colors.blueAccent
+            )
+          ),
+        ),
+      ),
+    ); // <- Corrección aquí
+  }
+}
+
+```
